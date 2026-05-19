@@ -1,0 +1,50 @@
+# Ambiente virtual
+.venv/
+venv/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Pytest / Ruff / caches
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# VS Code
+.vscode/
+
+# Arquivos do sistema
+.DS_Store
+Thumbs.db
+
+# Modelos e artefatos locais pesados
+models/*.joblib
+models/*.pth
+models/*.png
+
+# MLflow
+mlruns/
+*.db
+notebooks/mlruns/
+notebooks/*.db
+
+# Artefatos gerados em notebook
+notebooks/*.pth
+notebooks/*.png
+
+# Logs e temporários
+*.log
+*.tmp
+
+# Dados processados opcionais
+data/processed/
+
+# Notebooks intermediários / cópias
+notebooks/*_baixada.ipynb
+notebooks/*_corrigido.ipynb
+notebooks/*_teste.ipynb

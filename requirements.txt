@@ -1,0 +1,15 @@
+fastapi
+uvicorn
+pandas
+numpy
+scikit-learn
+torch
+mlflow
+joblib
+pydantic
+pytest
+ruff
+seaborn
+matplotlib
+jupyter
+notebook
