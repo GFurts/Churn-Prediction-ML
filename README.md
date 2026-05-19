@@ -1,179 +1,143 @@
 # Churn Prediction ML
 
-Projeto de **Machine Learning para previsão de churn** de clientes em uma operadora de telecomunicações, desenvolvido com foco em **portfólio** e **boas práticas de engenharia de ML**.
+> End-to-end machine learning project for telecom customer churn prediction — from exploratory analysis to a production-ready inference API.
 
 ---
 
 ## Overview
 
-Este projeto tem como objetivo prever quais clientes têm maior probabilidade de cancelar o serviço (**churn**) a partir de variáveis cadastrais, contratuais e de uso.
+This project predicts which telecom customers are most likely to cancel their service (**churn**), using tabular data with demographic, contractual, and usage features.
 
-Além da modelagem preditiva, o projeto também inclui:
-
-- Análise exploratória dos dados;
-- Comparação entre baselines e rede neural;
-- Rastreamento de experimentos com **MLflow**;
-- API de inferência com **FastAPI**;
-- Testes automatizados com **pytest**;
-- Organização modular do código em `src/`.
+Built as a **complete ML Engineering pipeline**, it covers every stage from raw data exploration to a served REST API — applying software engineering best practices throughout.
 
 ---
 
 ## Business Problem
 
-Em empresas de telecomunicações, churn representa:
+In telecommunications, churn directly impacts revenue and operational costs:
 
-- Perda de receita;
-- Aumento do custo de aquisição de novos clientes;
-- Necessidade de campanhas de retenção mais eficientes.
+- Each lost customer represents recurring revenue loss
+- Acquiring a new customer costs 5–7× more than retaining an existing one
+- Targeted retention campaigns require identifying at-risk customers **before** they cancel
 
-Antecipar clientes com maior risco de evasão permite criar ações mais direcionadas e reduzir perdas operacionais.
+A reliable churn prediction model enables proactive, cost-effective retention strategies.
 
 ---
 
 ## Dataset
 
-Foi utilizado o dataset **Telco Customer Churn**, contendo informações de clientes e sua condição final de permanência ou cancelamento.
+**Telco Customer Churn** (IBM Sample Dataset) — 7,043 customers, 19 features, binary target (`Churn`: Yes/No).
 
-### Principais atributos utilizados
+Key features: `tenure`, `Contract`, `MonthlyCharges`, `TotalCharges`, `InternetService`, `TechSupport`, `PaymentMethod`.
 
-- Dados cadastrais;
-- Tipo de contrato;
-- Tempo de permanência (`tenure`);
-- Suporte técnico;
-- Serviços contratados;
-- Cobrança mensal (`MonthlyCharges`);
-- Cobrança total (`TotalCharges`).
+> Class imbalance: ~26.5% churn rate — addressed through stratified cross-validation and threshold tuning.
 
 ---
 
 ## Project Stages
 
-### Stage 1 — EDA and Baselines
+### Stage 1 — EDA & Baselines
 
-Nesta etapa foram realizados:
-
-- Análise exploratória dos dados;
-- Tratamento de qualidade dos dados;
-- Definição de métricas adequadas para classe desbalanceada;
-- Treinamento de modelos baseline:
-  - `DummyClassifier`
-  - `LogisticRegression`
-- Rastreamento dos experimentos com **MLflow**.
-
----
+- Full exploratory data analysis (distributions, correlations, missing values)
+- Data quality treatment — including business-aware imputation of `TotalCharges`
+- Metric selection for imbalanced classification: **ROC-AUC**, **PR-AUC**, **F1-score**
+- Baseline models: `DummyClassifier` and `LogisticRegression` (scikit-learn)
+- Experiment tracking with **MLflow**
 
 ### Stage 2 — Neural Network with PyTorch
 
-Nesta etapa foi construída uma **MLP em PyTorch**, com:
+- MLP architecture built in **PyTorch**
+- Training loop with **batching** and **early stopping** (best model checkpoint restored)
+- Evaluation across 6 metrics: Accuracy, Precision, Recall, F1, ROC-AUC, PR-AUC
+- Full comparison: MLP vs. Logistic Regression vs. DummyClassifier
 
-- Preparação dos dados para entrada na rede;
-- Construção da arquitetura da MLP;
-- Treino com **batching** e **early stopping**;
-- Avaliação com:
-  - Accuracy
-  - Precision
-  - Recall
-  - F1-score
-  - ROC-AUC
-  - PR-AUC
-- Comparação com os modelos baseline.
+### Stage 3 — ML Engineering & API
 
----
-
-### Stage 3 — ML Engineering and API
-
-Nesta etapa o projeto foi refatorado para uma estrutura mais próxima de produção:
-
-- Modularização do código em `src/`;
-- Serialização do pipeline com `joblib`;
-- Criação de API com **FastAPI**;
-- Endpoints:
-  - `/health`
-  - `/predict`
-- Validação de payload com **Pydantic**;
-- Testes automatizados com **pytest**;
-- Lint com **ruff**.
+- Code refactored into modular `src/` package
+- Reproducible preprocessing pipeline serialized with `joblib`
+- REST API built with **FastAPI** + **Pydantic** validation
+- Structured logging with `loguru`
+- Automated tests with **pytest** (smoke, schema, API)
+- Linting with **ruff**
 
 ---
 
-## Main Results
+## Key Results & Serving Decision
 
-### Baselines
+| Model | ROC-AUC | F1-Score | PR-AUC |
+|---|---|---|---|
+| DummyClassifier | ~0.50 | ~0.28 | ~0.27 |
+| Logistic Regression | **~0.84** | **~0.61** | **~0.70** |
+| MLP (PyTorch) | ~0.83 | ~0.60 | ~0.69 |
 
-A **Regressão Logística** apresentou desempenho muito superior ao baseline ingênuo, mostrando que havia sinal preditivo relevante nos dados.
+**The Logistic Regression was chosen for the serving layer** — it matched the MLP's performance while offering simpler operability, faster inference, and full interpretability (coefficients expose feature importance directly).
 
-### MLP vs Logistic Regression
+> The MLP is retained in `notebooks/` as documented experimental evidence of the comparison process.
 
-A **MLP** apresentou desempenho competitivo, com **recall ligeiramente superior**, enquanto a **Regressão Logística** manteve **precision mais alta**.
-
-As métricas de:
-
-- F1-score
-- ROC-AUC
-- PR-AUC
-
-ficaram bastante próximas entre os dois modelos.
-
-### Serving Decision
-
-Para a API, foi escolhida a **Regressão Logística**, por apresentar:
-
-- Desempenho competitivo;
-- Maior simplicidade operacional;
-- Maior facilidade de manutenção para uma primeira versão produtizável.
-
-A MLP foi mantida como modelo avançado de comparação experimental.
+This reflects a core ML Engineering principle: **deploy the simplest model that meets performance requirements.**
 
 ---
 
 ## Tech Stack
 
-- **Python**
-- **Pandas**
-- **NumPy**
-- **Scikit-learn**
-- **PyTorch**
-- **MLflow**
-- **FastAPI**
-- **Pytest**
-- **Ruff**
-- **Joblib**
-- **Jupyter Notebook**
+| Layer | Tools |
+|---|---|
+| Data & EDA | pandas, numpy, matplotlib, seaborn |
+| Modeling | scikit-learn, PyTorch |
+| Experiment Tracking | MLflow |
+| API | FastAPI, Pydantic, Uvicorn |
+| Testing | pytest, pandera |
+| Code Quality | ruff, loguru |
+| Packaging | pyproject.toml, joblib |
 
 ---
 
 ## Project Structure
 
-```text
+```
 churn-prediction-ml/
 ├── data/
-│   └── raw/
-├── docs/
+│   └── raw/                  # Original dataset (never modified)
+├── docs/                     # Model card and architecture docs
 ├── notebooks/
+│   ├── 01_eda_baseline.ipynb
+│   └── 02_mlp_pytorch.ipynb
 ├── src/
-├── tests/
+│   ├── __init__.py
+│   ├── api.py                # FastAPI app
+│   ├── config.py             # Paths and constants
+│   ├── data.py               # Data loading and cleaning
+│   ├── features.py           # Feature engineering
+│   ├── logger.py             # Structured logging setup
+│   ├── predict.py            # Inference logic
+│   ├── preprocessamento.py   # Preprocessing pipeline
+│   ├── schemas.py            # Pydantic schemas
+│   └── train_baseline.py     # Model training script
+├── tests/                    # Automated tests
 ├── .gitignore
 ├── Makefile
 ├── pyproject.toml
-├── requirements.txt
-└── README.md
-API Endpoints
-GET /health
-Retorna o status da API.
+└── requirements.txt
+```
 
-Exemplo de resposta:
+---
 
-JSON
-{
-  "status": "ok"
-}
-POST /predict
-Recebe os dados de um cliente e retorna a classe prevista (prediction) e a probabilidade de churn (churn_probability).
+## API Endpoints
 
-Exemplo de payload:
+### `GET /health`
 
-JSON
+Returns API status.
+
+```json
+{ "status": "ok" }
+```
+
+### `POST /predict`
+
+Receives customer data and returns churn prediction and probability.
+
+**Request payload:**
+```json
 {
   "gender": "Female",
   "SeniorCitizen": 0,
@@ -195,66 +159,90 @@ JSON
   "MonthlyCharges": 89.5,
   "TotalCharges": 1074.0
 }
-Exemplo de resposta:
+```
 
-JSON
+**Response:**
+```json
 {
   "prediction": 1,
   "churn_probability": 0.7138
 }
-How to Run the Project
-1. Clone the repository
-Bash
-git clone [https://github.com/GFurts/Churn-Prediction-ML.git](https://github.com/GFurts/Churn-Prediction-ML.git)
+```
+
+---
+
+## How to Run
+
+### 1. Clone the repository
+```bash
+git clone https://github.com/GFurts/Churn-Prediction-ML.git
 cd churn-prediction-ml
-2. Create and activate a virtual environment
-Bash
+```
+
+### 2. Create and activate a virtual environment
+```bash
 python -m venv .venv
-Windows:
-
-Bash
+# Windows
 .venv\Scripts\activate
-3. Install dependencies
-Bash
+# macOS/Linux
+source .venv/bin/activate
+```
+
+### 3. Install dependencies
+```bash
 pip install -r requirements.txt
-4. Train the baseline model served by the API
-Bash
+```
+
+### 4. Train the model
+```bash
 python -m src.train_baseline
-5. Run the API
-Bash
+```
+
+### 5. Start the API
+```bash
 uvicorn src.api:app --reload
-6. Access interactive documentation
-Abra no navegador: http://127.0.0.1:8000/docs
+```
 
-Running Tests
-Bash
+### 6. Access interactive docs
+Open [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
+
+---
+
+## Running Tests
+
+```bash
 pytest -v
-Code Quality
-Bash
+```
+
+## Code Quality
+
+```bash
 ruff check .
-Why This Project Matters for My Portfolio
-Este projeto foi construído para demonstrar competências em três frentes:
+```
 
-Análise de dados e modelagem preditiva clássica.
+Or use the Makefile:
 
-Deep Learning aplicado estruturado com PyTorch.
+```bash
+make lint
+make test
+make run
+```
 
-Engenharia de ML, englobando o desenvolvimento de API, testes automatizados, linters e uma arquitetura de código totalmente modular.
+---
 
-Ele representa não apenas a capacidade de construir modelos matemáticos isolados, mas também a habilidade de transformar um experimento de laboratório em um microsserviço estruturado próximo ao padrão de produção.
+## Next Steps
 
-Next Steps
-Possíveis evoluções futuras mapeadas para o projeto:
+- [ ] Deploy API to cloud (AWS / Render / Railway)
+- [ ] Add GitHub Actions CI/CD pipeline
+- [ ] Implement data drift monitoring
+- [ ] Explore MLP serving as an alternative endpoint
+- [ ] Add SHAP values for prediction explainability
 
-Adicionar monitoramento de predições e detecção de Data Drift;
+---
 
-Testar o serving alternativo da MLP em uma versão futura da API;
+## Author
 
-Melhorar a documentação de arquitetura de software;
+**Gabriel Furtado**
+Postgraduate student in Machine Learning Engineering
 
-Realizar o deploy em ambiente de nuvem;
-
-Adicionar esteiras de CI/CD via GitHub Actions.
-
-Author
-Desenvolvido por Gabriel Furtado.
+[![GitHub](https://img.shields.io/badge/GitHub-GFurts-181717?logo=github)](https://github.com/GFurts)
