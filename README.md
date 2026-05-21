@@ -2,6 +2,8 @@
 
 ![CI](https://github.com/GFurts/Churn-Prediction-ML/actions/workflows/ci.yml/badge.svg)
 
+[![API](https://img.shields.io/badge/API-Live-brightgreen)](https://churn-prediction-ml-e4f1.onrender.com/docs)
+
 > End-to-end machine learning project for telecom customer churn prediction — from exploratory analysis to a production-ready inference API.
 
 ---
@@ -234,7 +236,7 @@ make run
 
 ## Next Steps
 
-- [ ] Deploy API to cloud (AWS / Render / Railway)
+- [x] Deploy API to cloud — [Live on Render](https://churn-prediction-ml-e4f1.onrender.com/docs)
 - [ ] Add GitHub Actions CI/CD pipeline
 - [ ] Implement data drift monitoring
 - [ ] Explore MLP serving as an alternative endpoint
