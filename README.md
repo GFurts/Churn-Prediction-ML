@@ -1,5 +1,7 @@
 # Churn Prediction ML
 
+![CI](https://github.com/GFurts/Churn-Prediction-ML/actions/workflows/ci.yml/badge.svg)
+
 > End-to-end machine learning project for telecom customer churn prediction — from exploratory analysis to a production-ready inference API.
 
 ---
